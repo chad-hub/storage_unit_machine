@@ -11,6 +11,8 @@ import urllib.request
 import pandas as pd
 # %%
 def get_summary(url, zipcodes):
+  summaries = []
+  tables = []
   for z in zipcodes:
     sub_links = []
     search_url = url + str(z)
@@ -24,8 +26,10 @@ def get_summary(url, zipcodes):
     summary_table = pd.read_html(search_url)
     print(summary)
     print(summary_table[0].head())
+    summaries.append(summary)
+    tables.append(summary_table)
 
-    return n, summary_table
+  return summaries, tables
 
 
 
@@ -52,7 +56,8 @@ def scrape_data(url, url2, zipcodes, num_units):
     output = []
     for idx, s in enumerate(sub_links):
       d = {}
-      new_link = url[:25] + s
+      print(s)
+      new_link = url[:25] + str(s)
 
       req = urllib.request.Request(new_link, headers={'User-Agent' : 'Magic Browser'})
       response = urllib.request.urlopen( req )
@@ -110,11 +115,6 @@ def scrape_data(url, url2, zipcodes, num_units):
 
 
 
-
-
-
-
-
 # %%
 
 
@@ -123,21 +123,29 @@ def scrape_data(url, url2, zipcodes, num_units):
 # %%
 
 if __name__ == '__main__':
-  zipcode = [int(input('Enter zip code:'))]
+  zipcodes = []
+  zipper =''
+  while zipper != 'done':
+    zipper = input("enter zip code or type 'done': ")
+
+    if zipper != 'done':
+      zipcodes.append(zipper)
+    print(zipcodes)
+
   url = 'https://www.sparefoot.com/search.html?location='
-  num_units, table = get_summary(url, zipcode)
-  if num_units > 100:
-    num_units = 10
+  summaries, tables = get_summary(url, zipcodes)
+
+  num_units = 20
   url2 = '&searchType=storage&page=1&listingsPerPage=' + str(num_units)
 
-  sub_links = scrape_data(url, url2, zipcode, num_units)
+  sub_links = scrape_data(url, url2, zipcodes, num_units)
 
   df = scrape_details(url, sub_links)
-  df.head()
+  print(df.head())
 
 
 
 # %%
 
-
+df.head()
 # %%
